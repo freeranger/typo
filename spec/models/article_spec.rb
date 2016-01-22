@@ -185,6 +185,46 @@ describe Article do
   it "test_send_multiple_pings" do
   end
   
+  describe "Merging articles" do
+    before do
+      @article1 = Factory(:article, :title => 'FooBar', :body =>'LoremIpsum')
+      @article2 = Factory(:article, :title => 'FooBar2', :body =>'LoremIpsum2')
+
+      @comment1 = Factory(:comment, :body => 'comment1', :article => @article1)
+      @comment2 = Factory(:comment, :body => 'comment2', :article => @article2)
+      
+      @merged = @article1.merge_with(@article2.id)
+    end
+
+    it "the bodies are merged" do
+        @merged.body.should include(@article1.body)
+        @merged.body.should include(@article2.body)
+    end
+
+    it "the comments are merged" do
+      @merged.comments.should include(@comment1)
+      @merged.comments.should include(@comment2)
+    end
+
+    it "the title is from the first article" do
+      assert_equal @merged.title, @article1.title
+    end
+
+    it "nil is returned when trying to merge the same article" do
+      assert_nil @article1.merge_with(@article1)
+    end
+
+    it "nil is returned when trying to merge with non-existent article" do
+      assert_nil @article1.merge_with(-123)
+    end
+
+    it "the original articles should be deleted" do
+        assert !Article.exists?(@article1.id)
+        assert !Article.exists?(@article2.id)
+    end
+
+  end
+
   describe "Testing redirects" do
     it "a new published article gets a redirect" do
       a = Article.create(:title => "Some title", :body => "some text", :published => true)

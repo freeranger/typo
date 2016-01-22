@@ -113,6 +113,22 @@ class Admin::ContentController < Admin::BaseController
     render :text => nil
   end
 
+  def merge
+    article = Article.find(params[:id])
+    if current_user.admin?
+      if merged = article.merge_with(params[:merge_with])
+        flash[:notice] = 'Articles successully merged.'
+        redirect_to merged.permalink_url
+      else
+        flash[:error] = 'Articles could not be merged for some reason.'
+        redirect_to :action => 'index'
+      end      
+    else
+      flash[:error] = 'Only admins can merge articles.'
+      redirect_to :action => 'index'
+    end
+  end 
+
   protected
 
   def get_fresh_or_existing_draft_for_article
@@ -158,8 +174,8 @@ class Admin::ContentController < Admin::BaseController
 
     @article.keywords = Tag.collection_to_string @article.tags
     @article.attributes = params[:article]
-    # TODO: Consider refactoring, because double rescue looks... weird.
-        
+    # TODO: Consider refactoring, because double rescue looks... weird.    
+
     @article.published_at = DateTime.strptime(params[:article][:published_at], "%B %e, %Y %I:%M %p GMT%z").utc rescue Time.parse(params[:article][:published_at]).utc rescue nil
 
     if request.post?

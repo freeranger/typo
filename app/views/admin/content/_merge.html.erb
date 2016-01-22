@@ -1,0 +1,6 @@
+<h4><%= _("Merge Articles") %></h4>
+<%= form_tag({:action => "merge", :id => @article.id}, :id => "merge_form") do %>
+	<label for="merge_with">Article ID&nbsp;</label>
+	<input type="text" name="merge_with" id="merge_with" />
+	<input id="merge" type="submit" value="Merge" name="merge" class='btn info' />
+<% end %>

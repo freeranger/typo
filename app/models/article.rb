@@ -122,6 +122,25 @@ class Article < Content
 
   end
 
+
+  def merge_with(other_article_id)
+    if !Article.exists?(self.id) || !Article.exists?(other_article_id) || self.id == other_article_id
+      return nil
+    end
+
+    other_article = Article.find_by_id(other_article_id) 
+
+    merged_article = Article.create({
+      user_id: self.user_id,
+      title: self.title,
+      body: self.body + other_article.body,
+      comments: self.comments + other_article.comments,
+      published: self.published
+    })
+    self.reload.destroy && other_article.reload.destroy
+    merged_article
+  end
+
   def year_url
     published_at.year.to_s
   end
